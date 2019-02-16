@@ -28,7 +28,7 @@ void pulsa_cont();
 int main()
 {
 	// Variables
-	int num_opciones = 7, seleccion = -1, faccion = 0;
+	int num_opciones = 8, seleccion = -1, faccion = 0;
 	char nombre[15], res;
 	
 	// Fecha actual
@@ -65,7 +65,7 @@ int main()
 					do {
 						printf("Introduce la faccion del usuario (1 = Aire, 2 = Agua, 3 = Fuego, 4 = Tierra): ");
 						scanf(" %d", &faccion);
-					} while (faccion < 1 || faccion > 4);
+					} while (faccion < 1 || faccion > Numero_Facciones());
 					usuario = Nuevo_Usuario(nombre, fecha_sub, --faccion);
 					clear();
 					Mostrar_Usuario(usuario);
@@ -78,12 +78,10 @@ int main()
 				
 			case 2:
 				Cargar_Lista_Usuarios(lista);
-				pulsa_cont();
 				break;
 			
 			case 3:
 				Guardar_Lista_Usuarios(lista);
-				pulsa_cont();
 				break;
 				
 			case 4:
@@ -93,10 +91,12 @@ int main()
 				Mostrar_Usuario(usuario);
 				pulsa_cont();
 				break;
+				
 			case 5:
 				MostrarLista_Usuarios(lista);
 				pulsa_cont();
 				break;
+				
 			case 6:
 				printf("Introduce el nombre del usuario: ");
 				scanf(" %s", &nombre);
@@ -113,7 +113,18 @@ int main()
 				}
 				pulsa_cont();
 				break;
+				
 			case 7:
+				printf("Introduce el nombre del usuario: ");
+				scanf(" %s", &nombre);
+				usuario=Buscar_en_Lista_Usuarios(lista, nombre);
+				Resub(usuario);
+				Mostrar_Usuario(usuario);
+				pulsa_cont();
+				break;
+				
+			case 8:
+				Guardar_Lista_Usuarios(lista);
 				VaciarLista_Usuarios(lista);
 				free(lista);
 				break;
@@ -135,7 +146,8 @@ void generar_menu_usuarios(int num_op, int *seleccion)
 	opciones[4] = "4 - Comprobar si un Usuario esta en la lista\n";
 	opciones[5] = "5 - Mostrar lista\n";
 	opciones[6] = "6 - Cambiar faccion\n";
-	opciones[7] = "7 - Salir del programa\n";
+	opciones[7] = "7 - Resub\n";
+	opciones[8] = "8 - Salir del programa\n";
 
 	clear();
 	for (i = 0; i < num_op; i++)

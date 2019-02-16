@@ -8,14 +8,11 @@ Descripcion:
 // Librerias
 
 // Constantes
-
-// Tipos
 #ifndef NULL
 	#define NULL 0
 #endif
 
-
-
+// Tipos
 typedef struct Lista_Usuarios{
 	Usuario* inicio;
 	Usuario* final;
@@ -23,8 +20,6 @@ typedef struct Lista_Usuarios{
 } Lista_Usuarios;
 
 // Declaracion de procedimientos y funciones
-
-// Operaciones con Lista_Usuarios
 Lista_Usuarios* CrearLista_Usuarios();
 void DestruirLista_Usuarios(Lista_Usuarios *lista);
 void Enlistar(Lista_Usuarios *lista, Usuario *usuario);
@@ -35,7 +30,6 @@ int Es_vacia_Lista_Usuarios(Lista_Usuarios *lista);
 void Guardar_Lista_Usuarios(Lista_Usuarios *lista);
 void Cargar_Lista_Usuarios(Lista_Usuarios *lista);
 
-// FUNCIONES
 // Operaciones con Lista-Usuario
 Lista_Usuarios* CrearLista_Usuarios(){
 	Lista_Usuarios* lista = (Lista_Usuarios *)malloc(sizeof(Lista_Usuarios));
@@ -150,13 +144,13 @@ void Guardar_Lista_Usuarios(Lista_Usuarios *lista){
 		if(fptr == NULL)
    		{
    			printf("Error, no se ha podido guardar");
-   			exit(1);
-   		}
-		fprintf(fptr, "Nombre;Fecha\n");
-		Usuario *usuario = lista->inicio;
-		while (usuario != NULL){
-			Guardar_Usuario(usuario, fptr);
-			usuario = usuario->sig;
+   		} else {
+			fprintf(fptr, "Nombre,Fecha\n");
+			Usuario *usuario = lista->inicio;
+			while (usuario != NULL){
+				Guardar_Usuario(usuario, fptr);
+				usuario = usuario->sig;
+			}
 		}
 		fclose(fptr);
 	}
@@ -169,14 +163,13 @@ void Cargar_Lista_Usuarios(Lista_Usuarios *lista){
 		if(fptr == NULL)
    		{
    			printf("Error, no se ha podido cargar");
-   			exit(1);
-   		}
-   		char linea[1024];
-   		fgets(linea, 1024, fptr);
+   		} else {
+		fscanf(fptr, "%*[^\n]\n", NULL); // Saltar la primera linea
 		while (!feof(fptr))
-		{
-			Usuario *usuario = Cargar_Usuario(fptr);
-			Enlistar(lista, usuario);
+			{
+				Usuario *usuario = Cargar_Usuario(fptr);
+				Enlistar(lista, usuario);
+			}
 		}
 		fclose(fptr);
 	}
