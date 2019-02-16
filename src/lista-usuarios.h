@@ -6,7 +6,6 @@ Descripcion:
 
 // Cabezera
 // Librerias
-#include <string.h>
 
 // Constantes
 
@@ -30,16 +29,17 @@ Lista_Usuarios* CrearLista_Usuarios();
 void DestruirLista_Usuarios(Lista_Usuarios *lista);
 void Enlistar(Lista_Usuarios *lista, Usuario *usuario);
 void Desenlistar(Lista_Usuarios *lista, Usuario *usuario);
-Usuario* Buscar_en_lista_doblelig(Lista_Usuarios *lista, char *usuario);
+Usuario* Buscar_en_Lista_Usuarios(Lista_Usuarios *lista, char *usuario);
 void VaciarLista_Usuarios(Lista_Usuarios *lista);
 int Es_vacia_Lista_Usuarios(Lista_Usuarios *lista);
 void Guardar_Lista_Usuarios(Lista_Usuarios *lista);
+void Cargar_Lista_Usuarios(Lista_Usuarios *lista);
 
 // FUNCIONES
 // Operaciones con Lista-Usuario
 Lista_Usuarios* CrearLista_Usuarios(){
 	Lista_Usuarios* lista = (Lista_Usuarios *)malloc(sizeof(Lista_Usuarios));
-	lista->inicio = NULL; lista->final=NULL;
+	lista->inicio = NULL; lista->final = NULL;
 	lista->tamano = 0;
 	return lista;
 }
@@ -54,14 +54,16 @@ void DestruirLista_Usuarios(Lista_Usuarios *lista){
 }
 
 void Enlistar(Lista_Usuarios *lista, Usuario *usuario){
-	lista->tamano++;
-	if (Es_vacia_Lista_Usuarios(lista)){
-		lista->inicio = usuario;
-		lista->final = usuario;
-	} else {
-		usuario->ant = lista->final;
-		lista->final->sig = usuario;
-		lista->final = usuario;
+	if (usuario != NULL){
+		lista->tamano++;
+		if (Es_vacia_Lista_Usuarios(lista)){
+			lista->inicio = usuario;
+			lista->final = usuario;
+		} else {
+			usuario->ant = lista->final;
+			lista->final->sig = usuario;
+			lista->final = usuario;
+		}
 	}
 }
 
@@ -93,11 +95,9 @@ void Desenlistar(Lista_Usuarios *lista, Usuario *usuario){
 	}
 }
 
-Usuario* Buscar_en_lista_doblelig(Lista_Usuarios *lista, char *usuario){
+Usuario* Buscar_en_Lista_Usuarios(Lista_Usuarios *lista, char *usuario){
 	if (!(Es_vacia_Lista_Usuarios(lista))){
-		Usuario *aux_s, *aux_a;
-		aux_s=lista->inicio;
-		aux_a=lista->final;
+		Usuario *aux_s = lista->inicio, *aux_a = lista->final;
 		int i = 0;
 		while ((i < ((lista->tamano / 2))) && (strcmp(aux_s->Nombre, usuario) != 0) 
 				&& (strcmp(aux_a->Nombre, usuario) != 0)){
@@ -129,16 +129,13 @@ int Es_vacia_Lista_Usuarios(Lista_Usuarios *lista){
 
 void MostrarLista_Usuarios(Lista_Usuarios *lista){
 	if (!(Es_vacia_Lista_Usuarios(lista))){
-		Usuario* aux;
-		int i=0;
-		aux=lista->inicio;
-		printf("\nNumero de Usuarios: %d\
-		\nUsuario - Faccion Actual - Puntos Disponibles\n",lista->tamano);
+		Usuario* aux = lista->inicio;
+		printf("Numero de Usuarios: %d\n\
+		\nUsuario - Faccion Actual - Puntos Disponibles\n\n",lista->tamano);
 		while (aux != NULL){
 			printf("%s - %s - %d\n", aux->Nombre, aux->facciones.faccion_actual,
 			aux->puntos.disponibles);
 			aux = aux->sig;
-			i++;
 		}
 	} else {
 		printf("La lista esta vacia\n");
@@ -147,5 +144,41 @@ void MostrarLista_Usuarios(Lista_Usuarios *lista){
 }
 
 void Guardar_Lista_Usuarios(Lista_Usuarios *lista){
-	
+	if (!(Es_vacia_Lista_Usuarios(lista))){
+		FILE *fptr;
+		fptr = fopen("./datos/datos.txt", "w");
+		if(fptr == NULL)
+   		{
+   			printf("Error, no se ha podido guardar");
+   			exit(1);
+   		}
+		fprintf(fptr, "Nombre;Fecha\n");
+		Usuario *usuario = lista->inicio;
+		while (usuario != NULL){
+			Guardar_Usuario(usuario, fptr);
+			usuario = usuario->sig;
+		}
+		fclose(fptr);
+	}
 }
+
+void Cargar_Lista_Usuarios(Lista_Usuarios *lista){
+	if ((Es_vacia_Lista_Usuarios(lista))){
+		FILE *fptr;
+		fptr = fopen("./datos/datos.txt", "r");
+		if(fptr == NULL)
+   		{
+   			printf("Error, no se ha podido cargar");
+   			exit(1);
+   		}
+   		char linea[1024];
+   		fgets(linea, 1024, fptr);
+		while (!feof(fptr))
+		{
+			Usuario *usuario = Cargar_Usuario(fptr);
+			Enlistar(lista, usuario);
+		}
+		fclose(fptr);
+	}
+}
+
