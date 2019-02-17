@@ -7,6 +7,7 @@ Descripcion:
 // Cabezera
 // Librerias
 
+
 // Constantes
 #ifndef NULL
 	#define NULL 0
@@ -145,7 +146,6 @@ void Guardar_Lista_Usuarios(Lista_Usuarios *lista){
    		{
    			printf("Error, no se ha podido guardar");
    		} else {
-			fprintf(fptr, "Nombre,Fecha\n");
 			Usuario *usuario = lista->inicio;
 			while (usuario != NULL){
 				Guardar_Usuario(usuario, fptr);
@@ -164,7 +164,7 @@ void Cargar_Lista_Usuarios(Lista_Usuarios *lista){
    		{
    			printf("Error, no se ha podido cargar");
    		} else {
-		fscanf(fptr, "%*[^\n]\n", NULL); // Saltar la primera linea
+		//fscanf(fptr, "%*[^\n]\n", NULL); // Saltar la primera linea
 		while (!feof(fptr))
 			{
 				Usuario *usuario = Cargar_Usuario(fptr);

@@ -44,7 +44,7 @@ typedef struct Usuario
 } Usuario;
 
 // Declaracion de procedimientos y funciones
-Usuario* Nuevo_Usuario();
+Usuario* Nuevo_Usuario(char *nombre, Date fecha_sub, int id_faccion);
 void Modificar_Usuario(Usuario *Usuario);
 void Borrar_Usuario(Usuario *Usuario);
 void Mostrar_Usuario(Usuario *usuario);
@@ -58,7 +58,7 @@ Usuario* Nuevo_Usuario(char *nombre, Date fecha_sub, int id_faccion)
 {
 	int i,j;
 	Usuario *usuario = (Usuario *)malloc(sizeof(Usuario));
-
+	usuario->Nombre = (char *)malloc(LONG_NOM * sizeof(char));
 	strcpy(usuario->Nombre, nombre);
 	usuario->facciones.faccion_actual = Obtener_Nombre_Faccion(id_faccion);
 	usuario->facciones.id_faccion = id_faccion;
@@ -96,10 +96,12 @@ void Mostrar_Usuario(Usuario *usuario){
 		printf("Nombre: %s\
 		\n	Fecha de suscripcion: %d/%d/%d\
 		\n	Faccion: %s\
-		\n	Puntos Disponibles: %d\n",
+		\n	Puntos Disponibles: %d\
+		\n	Puntos Sumador: %d\n",
 		usuario->Nombre,usuario->fecha_sub.day,
 		usuario->fecha_sub.month,usuario->fecha_sub.year,usuario->facciones.faccion_actual,
-		usuario->puntos.disponibles);
+		usuario->puntos.disponibles,
+		usuario->puntos.sumador);
 	} else {
 		printf("El usuario no existe");
 	}
@@ -107,90 +109,69 @@ void Mostrar_Usuario(Usuario *usuario){
 
 unsigned int Convertir_char_a_unsigned_bit(char *linea, int *i){
 	unsigned int aux = 0;
-	while (linea[++(*i)] != ',' && linea[(*i)] != '\n')
+	while (linea[(*i)] == ','){
+		(*i)++;
+	}
+	while (linea[(*i)] != ',' && linea[(*i)] != '\n' && linea[(*i)] != '\0')
 	{
-		aux = ((aux * 10) + (linea[(*i)] - '0'));
+		aux = ((aux * 10) + (linea[(*i)++] - '0'));
 	}
 	return aux;
 }
 
 Usuario* Cargar_Usuario(FILE *fptr){
 	char linea[LONG_LINEA];
-	if (!fgets(linea, LONG_LINEA, fptr)){
+	int i,j,c=0;
+	Usuario *usuario = (Usuario *)malloc(sizeof(Usuario));
+	usuario->Nombre = (char *)malloc(LONG_NOM * sizeof(char));
+	usuario->facciones.faccion_actual = (char *)malloc(LONG_NOM * sizeof(char));
+	
+	if (fscanf(fptr, "%[^,],%u,%u,%u,%u%[^\n]\n",
+		usuario->Nombre,
+		&usuario->fecha_sub.year,
+		&usuario->fecha_sub.month,
+		&usuario->fecha_sub.day,
+		&usuario->facciones.id_faccion,
+		linea
+		) == EOF){
 		return NULL;
 	}
-	int c = 0, i, j;
-	char *nombre = (char *)malloc(LONG_NOM * sizeof(char));
-	Usuario *usuario = (Usuario *)malloc(sizeof(Usuario));
-	// Obtener Nombre
-	strncpy(nombre, linea, LONG_NOM + 1);
-	strtok(nombre,",");
-	usuario->Nombre = nombre;
-	while (linea[(c)] != ','){ c++; }
-	// Obtener Fecha Año
-	usuario->fecha_sub.year = Convertir_char_a_unsigned_bit(linea, &c);
-	// Obtener Fecha Mes
-	usuario->fecha_sub.month = Convertir_char_a_unsigned_bit(linea, &c);
-	// Obtener Fecha Dia
-	usuario->fecha_sub.day = Convertir_char_a_unsigned_bit(linea, &c);
-	// Obtener Id_Faccion
-	usuario->facciones.id_faccion = Convertir_char_a_unsigned_bit(linea, &c);
+	
 	usuario->facciones.faccion_actual = Obtener_Nombre_Faccion(usuario->facciones.id_faccion);
-	// Obtener Ataques/Defensas
 	for (i = 0; i < Numero_Facciones(); i++){
 		for (j = 0; j < Numero_Facciones(); j++){
 			usuario->facciones.puntos_facciones[i][j] = Convertir_char_a_unsigned_bit(linea, &c);
 		}
 	}
-	// Obtener Puntos Disponibles
+	
 	usuario->puntos.disponibles = Convertir_char_a_unsigned_bit(linea, &c);
-	// Obtener Puntos Utilizados
 	usuario->puntos.utilizados = Convertir_char_a_unsigned_bit(linea, &c);
-	// Obtener Puntos Sumador
 	usuario->puntos.sumador = Convertir_char_a_unsigned_bit(linea, &c);
-	// para la lista
+			
 	usuario->sig = NULL;
 	usuario->ant = NULL;
+	
 	return usuario;
 }
 
 
 void Guardar_Usuario(Usuario *usuario, FILE *fptr){
 	int i,j;
-	char linea[LONG_LINEA], aux[DIGITOS_NUM];
-	// Obtener nombre
-	strcpy(linea, usuario->Nombre); 
-	strcat(linea, ",");
-	// Obtener Año
-	sprintf(aux,  "%d,", usuario->fecha_sub.year); 
-	strcat(linea, aux);	
-	// Obtener Mes
-	sprintf(aux,  "%d,", usuario->fecha_sub.month); 
-	strcat(linea, aux);	
-	// Obtener Dia
-	sprintf(aux,  "%d,", usuario->fecha_sub.day); 
-	strcat(linea, aux);	
-	// Obtener Id Faccion [0] al [3]
-	sprintf(aux,  "%d,", usuario->facciones.id_faccion); 
-	strcat(linea, aux);	
-	// Obtener Puntos de ataque/defensa
+	fprintf(fptr, "%s,%u,%u,%u,%u,",
+		usuario->Nombre, 
+		usuario->fecha_sub.year,
+		usuario->fecha_sub.month,
+		usuario->fecha_sub.day,
+		usuario->facciones.id_faccion);
 	for (i = 0; i < Numero_Facciones(); i++){
 		for (j = 0; j < Numero_Facciones(); j++){
-			sprintf(aux,  "%d,", usuario->facciones.puntos_facciones[i][j]); 			
-			strcat(linea, aux);	
+			fprintf(fptr, "%u,", usuario->facciones.puntos_facciones[i][j]); 			
 		}
 	}
-	// Obtener Puntos Disponibles
-	sprintf(aux,  "%d,", usuario->puntos.disponibles); 
-	strcat(linea, aux);	
-	// Obtener Puntos Utilizados
-	sprintf(aux,  "%d,", usuario->puntos.utilizados); 
-	strcat(linea, aux);	
-	// Obtener Puntos Sumador
-	sprintf(aux,  "%d\n", usuario->puntos.sumador); 
-	strcat(linea, aux);	
-	// Escribir en el fichero
-	fprintf(fptr, "%s", linea);
+	fprintf(fptr, "%u,%u,%u\n",
+		usuario->puntos.disponibles, 
+		usuario->puntos.utilizados, 
+		usuario->puntos.sumador);
 }
 
 void Resub(Usuario *usuario){
