@@ -16,7 +16,6 @@ Descripcion:
 
 #define LONG_NOM 15
 #define LONG_LINEA 1024
-#define DIGITOS_NUM 52
 
 // Tipos
 typedef struct Date
@@ -35,7 +34,7 @@ typedef struct Puntos
 
 typedef struct Usuario
 {
-	char *Nombre;
+	char Nombre[LONG_NOM];
 	struct Date fecha_sub;
 	struct Facciones facciones;
 	struct Puntos puntos;
@@ -58,7 +57,6 @@ Usuario* Nuevo_Usuario(char *nombre, Date fecha_sub, int id_faccion)
 {
 	int i,j;
 	Usuario *usuario = (Usuario *)malloc(sizeof(Usuario));
-	usuario->Nombre = (char *)malloc(LONG_NOM * sizeof(char));
 	strcpy(usuario->Nombre, nombre);
 	usuario->facciones.faccion_actual = Obtener_Nombre_Faccion(id_faccion);
 	usuario->facciones.id_faccion = id_faccion;
@@ -123,8 +121,6 @@ Usuario* Cargar_Usuario(FILE *fptr){
 	char linea[LONG_LINEA];
 	int i,j,c=0;
 	Usuario *usuario = (Usuario *)malloc(sizeof(Usuario));
-	usuario->Nombre = (char *)malloc(LONG_NOM * sizeof(char));
-	usuario->facciones.faccion_actual = (char *)malloc(LONG_NOM * sizeof(char));
 	
 	if (fscanf(fptr, "%[^,],%u,%u,%u,%u%[^\n]\n",
 		usuario->Nombre,

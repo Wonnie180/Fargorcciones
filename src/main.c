@@ -16,77 +16,17 @@ Descripcion:
 // propias
 #include "./usuarios.h"
 #include "./lista-usuarios.h"
-
+#include "./menus.h"
 // Constantes
 #define clear() printf("\033[H\033[J")
 
 // Tipos
 
-void generar_menu_usuarios(int num_op, int *seleccion);
-void pulsa_cont();
-
 int main()
 {
-	// Variables
-	int num_opciones = 8, seleccion = -1, faccion;
-	char nombre[LONG_NOM], res;
-	
-	// Fecha actual
-	time_t t = time(NULL);
-	struct tm tm = *localtime(&t);
-	
-	// Listas/usuarios
-	Lista_Usuarios *lista=CrearLista_Usuarios();;
-	Usuario *usuario;
-	Date fecha_sub;
-	fecha_sub.year = tm.tm_year + 1900;	
-	fecha_sub.month = tm.tm_mon + 1;
-	fecha_sub.day = tm.tm_mday;
-	
-	
-	// Programa
-	do
-	{
-		generar_menu_usuarios(num_opciones + 1, &seleccion);
-		switch (seleccion)
-		{
-			case 1:
-				printf("Introduce el nombre del usuario: ");
-				scanf(" %s", &nombre);
-				if (Buscar_en_Lista_Usuarios(lista, nombre)){
-					printf("El usuario %s ya existe.",nombre);
-					pulsa_cont();
-					break;
-				}
-				printf("Se ha suscrito hoy? (s/n): ");
-				scanf(" %c", &res);
-				if (res != 's'){
-					do {
-						printf("Introduce la fecha de suscripcion (dd/mm/aaaa): ");
-						scanf(" %d/%d/%d", &fecha_sub.day, &fecha_sub.month, &fecha_sub.year);
-					} while ((fecha_sub.day < 1 || fecha_sub.day > 31) || (fecha_sub.month < 1 || fecha_sub.month > 12));
-				}
-				do {
-					printf("Introduce la faccion del usuario (1 = Aire, 2 = Agua, 3 = Fuego, 4 = Tierra): ");
-					scanf(" %d", &faccion);
-				} while (faccion < 1 || faccion > Numero_Facciones());
-				usuario = Nuevo_Usuario(nombre, fecha_sub, --faccion); 				
-				clear();
-				Mostrar_Usuario(usuario);
-				Enlistar(lista, usuario);
-				pulsa_cont();
-				break;
-				
-			case 2:
-				Cargar_Lista_Usuarios(lista);
-								pulsa_cont();
-				break;
-			
-			case 3:
-				Guardar_Lista_Usuarios(lista);
-								pulsa_cont();
-				break;
-				
+	Lista_Usuarios *lista=CrearLista_Usuarios();
+	Cargar_Lista_Usuarios(lista);
+/*
 			case 4:
 				printf("Introduce el nombre del usuario: ");
 				scanf(" %s", &nombre);
@@ -125,18 +65,13 @@ int main()
 				Mostrar_Usuario(usuario);
 				pulsa_cont();
 				break;
-				
-			case 8:
-				Guardar_Lista_Usuarios(lista);
-				VaciarLista_Usuarios(lista);
-				free(lista);
-				break;
 		}
-	} while (seleccion != num_opciones);
+	} while (seleccion != num_opciones);*/
+	generar_menu_principal(lista);
 	return 0;
 }
 
-
+/*
 void generar_menu_usuarios(int num_op, int *seleccion)
 {
 	int i;
@@ -168,5 +103,5 @@ void pulsa_cont(){
 	while ((c = getchar()) != '\n' && c != EOF) { }
 	printf("\nPulsa una tecla para continuar\n");
 	getchar();
-}
+}*/
 

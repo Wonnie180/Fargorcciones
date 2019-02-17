@@ -7,7 +7,6 @@ Descripcion:
 // Cabezera
 // Librerias
 
-
 // Constantes
 #ifndef NULL
 	#define NULL 0
@@ -138,10 +137,44 @@ void MostrarLista_Usuarios(Lista_Usuarios *lista){
 	printf("\n");
 }
 
+void Copiar_Archivo(char *dir_origen, char *dir_destino){
+	char ch;
+	FILE *f_origen = fopen(dir_origen, "r"), 
+		 *f_destino = fopen(dir_destino, "w");
+	if (!f_origen){
+		f_origen = fopen(dir_origen, "w+");
+	}
+	while((ch = fgetc(f_origen)) != EOF){
+		fputc(ch, f_destino);	
+	}
+	fclose(f_origen);			
+	fclose(f_destino);	
+}
+
+void Copia_Seguridad()
+{
+	int i = 0;
+	char ch, origen[100], destino[100], aux[100], *nom_fichero;
+	nom_fichero = "./datos/datos";
+    sprintf(aux, "%s-aux", nom_fichero);
+ 	sprintf(origen, "%s%i", nom_fichero, 0);
+	for (i = 1; i < 10; i++){
+		sprintf(destino, "%s%i", nom_fichero, i);
+		// AUX = B
+		Copiar_Archivo(destino,aux);
+		// B = A
+		Copiar_Archivo(origen, destino);
+		// A = AUX
+		Copiar_Archivo(aux, origen);
+	}
+	Copiar_Archivo("./datos/datos.txt", origen);
+	remove(aux);
+}
+
 void Guardar_Lista_Usuarios(Lista_Usuarios *lista){
 	if (!(Es_vacia_Lista_Usuarios(lista))){
-		FILE *fptr;
-		fptr = fopen("./datos/datos.txt", "w");
+		Copia_Seguridad();
+		FILE *fptr = fopen("./datos/datos.txt", "w");
 		if(fptr == NULL)
    		{
    			printf("Error, no se ha podido guardar");
@@ -151,8 +184,8 @@ void Guardar_Lista_Usuarios(Lista_Usuarios *lista){
 				Guardar_Usuario(usuario, fptr);
 				usuario = usuario->sig;
 			}
+			fclose(fptr);
 		}
-		fclose(fptr);
 	}
 }
 
@@ -164,14 +197,14 @@ void Cargar_Lista_Usuarios(Lista_Usuarios *lista){
    		{
    			printf("Error, no se ha podido cargar");
    		} else {
-		//fscanf(fptr, "%*[^\n]\n", NULL); // Saltar la primera linea
-		while (!feof(fptr))
+			while (!feof(fptr))
 			{
 				Usuario *usuario = Cargar_Usuario(fptr);
 				Enlistar(lista, usuario);
 			}
+			fclose(fptr);
 		}
-		fclose(fptr);
+		
 	}
 }
 
