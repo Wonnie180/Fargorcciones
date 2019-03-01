@@ -8,13 +8,27 @@ Descripcion:
 // Librerias
 #ifdef _WIN32 
 	#include <io.h>
-	int Existe_f(const char *pathname){
-		return !(_access(pathname, 0));
+	int Existe_Archivo(const char *pathname){
+		if (_access(pathname, 0) == 0)
+		{
+			return 1;
+		}
+		return 0;
+	}
+	void Crear_Dir(char *pathname){
+		_mkdir(pathname);
 	}
 #else
 	#include <unistd.h>
-	int Existe_f(const char *pathname){
-		return !(access(pathname, F_OK));
+	int Existe_Archivo(const char *pathname){
+		if (access(pathname, F_OK) == 0)
+		{
+			return 1;
+		}
+		return 0;
+	}
+	void Crear_Dir(char *pathname){
+		mkdir(pathname, 0755);
 	}
 #endif
 
@@ -212,12 +226,12 @@ void Copia_Seguridad()
 	char ch, origen[100], destino[100], *nom_fichero;
 	nom_fichero = "./datos/datos";
 	sprintf(origen, "%s%d", nom_fichero, 9);
-	if (access(origen, F_OK) == 0){ remove(origen); }
+	if (Existe_Archivo(origen)){ remove(origen); }
 	for (i = 9; i > 0; i--)
 	{
 		sprintf(origen, "%s%i", nom_fichero, i-1);
 		sprintf(destino, "%s%i", nom_fichero, i);
-		if (access(origen, F_OK) == 0){ rename(origen, destino); }
+		if (Existe_Archivo(origen)){ rename(origen, destino); }
 	}
 	Copiar_Archivo("./datos/datos.txt", origen);
 }
@@ -226,6 +240,7 @@ void Guardar_Lista_Usuarios(Lista_Usuarios *lista)
 {
 	if (!(Es_vacia_Lista_Usuarios(lista)))
 	{
+		Crear_Dir("./datos");
 		Copia_Seguridad();
 		FILE *fptr = fopen("./datos/datos.txt", "w");
 		if (fptr == NULL)
